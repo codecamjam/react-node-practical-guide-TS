@@ -3,6 +3,7 @@ import { getManager } from 'typeorm';
 import { User } from '../entity/user.entity';
 import { RegisterValidation } from '../validation/register.validation';
 import bcryptjs from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 
 export const Register = async (req: Request, res: Response) => {
   const body = req.body;
@@ -42,7 +43,17 @@ export const Login = async (req: Request, res: Response) => {
     return res.status(404).send({ message: 'invalid credentials' });
   }
 
-  const { password, ...data } = user;
+  const token = sign(
+    {
+      id: user.id,
+    },
+    'secret'
+  );
 
-  res.send(data);
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, //1day
+  });
+
+  res.send({ message: 'success' });
 };

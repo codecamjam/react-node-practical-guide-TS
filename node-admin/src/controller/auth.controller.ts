@@ -59,17 +59,27 @@ export const Login = async (req: Request, res: Response) => {
 };
 
 export const AuthenticatedUser = async (req: Request, res: Response) => {
-  const jwt = req.cookies['jwt'];
+  try {
+    const jwt = req.cookies['jwt'];
 
-  const payload: any = verify(jwt, 'secret');
+    const payload: any = verify(jwt, 'secret');
 
-  if (!payload) {
-    return res.status(401).send({ messagemessage: 'unauthorized' });
+    if (!payload) {
+      return res.status(401).send({ message: 'unauthorized' });
+    }
+
+    const repository = getManager().getRepository(User);
+
+    const { password, ...user } = await repository.findOne(payload.id);
+
+    res.send(user);
+  } catch (e) {
+    return res.status(401).send({ message: 'unauthenticated' });
   }
+};
 
-  const repository = getManager().getRepository(User);
+export const Logout = async (req: Request, res: Response) => {
+  res.cookie('jwt', '', { maxAge: 0 });
 
-  const { password, ...user } = await repository.findOne(payload.id);
-
-  res.send(user);
+  return res.send({ message: 'success' });
 };

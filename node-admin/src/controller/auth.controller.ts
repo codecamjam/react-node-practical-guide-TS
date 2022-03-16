@@ -68,3 +68,33 @@ export const Logout = async (req: Request, res: Response) => {
 
   return res.send({ message: 'success' });
 };
+
+export const UpdateInfo = async (req: Request, res: Response) => {
+  const user = req['user'];
+
+  const repository = getManager().getRepository(User);
+
+  await repository.update(user.id, req.body);
+
+  const { password, ...data } = await repository.findOne(user.id);
+
+  res.send(data);
+};
+
+export const UpdatePassword = async (req: Request, res: Response) => {
+  const user = req['user'];
+
+  if (req.body.password !== req.body.password_confirm) {
+    return res.status(400).send({ message: 'Passwords do not match' });
+  }
+
+  const repository = getManager().getRepository(User);
+
+  await repository.update(user.id, {
+    password: await bcryptjs.hash(req.body.password, 10),
+  });
+
+  const { password, ...data } = user;
+
+  res.send(data);
+};

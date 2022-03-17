@@ -22,6 +22,7 @@ createConnection().then(async (connection) => {
         product_title: faker.lorem.words(2),
         price: randomInt(10, 100),
         quantity: randomInt(1, 5),
+        created_at: faker.date.past(2).toDateString(),
       });
     }
   }

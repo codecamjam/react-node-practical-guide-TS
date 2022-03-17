@@ -73,3 +73,16 @@ export const Export = async (req: Request, res: Response) => {
 
   res.send(csv);
 };
+
+export const Chart = async (req: Request, res: Response) => {
+  const manager = getManager();
+
+  const result = await manager.query(`
+    SELECT o.created_at AS 'date', SUM(oi.price * oi.quantity) AS 'sum'
+    FROM \`order\` o
+    JOIN order_item oi ON o.id = oi.order_id
+    GROUP BY o.created_at
+  `);
+
+  res.send(result);
+};
